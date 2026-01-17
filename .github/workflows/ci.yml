@@ -1,0 +1,46 @@
+# Имя нашего CI пайплайна
+name: Node.js CI
+
+# Триггеры для запуска: push или pull request в master ветку
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+# Задачи, которые будут выполняться
+jobs:
+  build:
+    # Используем последнюю версию Ubuntu в качестве операционной системы
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        # Проверяем на стабильной LTS версии Node.js
+        node-version: [18.x]
+
+    steps:
+      # 1. Клонируем репозиторий в виртуальную машину
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. Настраиваем пакетный менеджер pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8 # Версия pnpm
+
+      # 3. Настраиваем Node.js и кеширование зависимостей для ускорения
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'pnpm'
+
+      # 4. Устанавливаем зависимости проекта
+      - name: Install dependencies
+        run: pnpm install
+
+      # 5. Запускаем скрипт инициализации БД для проверки работоспособности
+      - name: Initialize database
+        run: pnpm run init-db

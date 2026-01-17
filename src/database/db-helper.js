@@ -27,6 +27,11 @@ function saveDatabase() {
 	if (db) {
 		const data = db.export();
 		const buffer = Buffer.from(data);
+        // Убедимся, что директория существует, прежде чем писать файл
+        const dir = path.dirname(dbPath);
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
 		fs.writeFileSync(dbPath, buffer);
 	}
 }

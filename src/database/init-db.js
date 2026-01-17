@@ -7,27 +7,18 @@ const dbPath = path.join(__dirname, '../../database.db');
 
 let db;
 
-async function initDatabase() {
-	const SQL = await initSqlJs();
-
-	// Попытка загрузить существующую базу данных
-	if (fs.existsSync(dbPath)) {
-		const buffer = fs.readFileSync(dbPath);
-		db = new SQL.Database(buffer);
-	} else {
-		db = new SQL.Database();
-	}
-
-	console.log('Подключение к базе данных SQLite установлено.');
-
-	// Включение внешних ключей
-	db.run('PRAGMA foreign_keys = ON');
-
-	return db;
-}
+const {
+	initDatabase,
+	getDb,
+	query,
+	queryOne,
+	run,
+	saveDatabase,
+} = require('./db-helper');
 
 // SQL-запросы для создания таблиц
 const createTables = () => {
+	const db = getDb();
 	// Создание таблицы групп
 	db.exec(`
         CREATE TABLE IF NOT EXISTS groups (
@@ -131,16 +122,16 @@ const insertSampleData = () => {
 
 	// Вставка данных
 	groups.forEach(group => {
-		db.run('INSERT OR IGNORE INTO groups (name) VALUES (?)', [group]);
+		run('INSERT OR IGNORE INTO groups (name) VALUES (?)', [group]);
 	});
 	teachers.forEach(teacher => {
-		db.run('INSERT OR IGNORE INTO teachers (full_name) VALUES (?)', [teacher]);
+		run('INSERT OR IGNORE INTO teachers (full_name) VALUES (?)', [teacher]);
 	});
 	subjects.forEach(subject => {
-		db.run('INSERT OR IGNORE INTO subjects (name) VALUES (?)', [subject]);
+		run('INSERT OR IGNORE INTO subjects (name) VALUES (?)', [subject]);
 	});
 	classrooms.forEach(classroom => {
-		db.run('INSERT OR IGNORE INTO classrooms (room_number) VALUES (?)', [
+		run('INSERT OR IGNORE INTO classrooms (room_number) VALUES (?)', [
 			classroom,
 		]);
 	});
@@ -203,29 +194,28 @@ const insertSampleData = () => {
 		},
 	];
 
-	const get_id_query = (table, column, value) =>
-		`SELECT id FROM ${table} WHERE ${column} = ?`;
-
 	scheduleEntries.forEach(entry => {
-		try {
-			const groupId = db.exec(get_id_query('groups', 'name', entry.group))[0]
-				.values[0][0];
-			const subjectId = db.exec(
-				get_id_query('subjects', 'name', entry.subject)
-			)[0].values[0][0];
-			const teacherId = db.exec(
-				get_id_query('teachers', 'full_name', entry.teacher)
-			)[0].values[0][0];
-			const classroomId = db.exec(
-				get_id_query('classrooms', 'room_number', entry.classroom)
-			)[0].values[0][0];
+		const groupId = queryOne('SELECT id FROM groups WHERE name = ?', [
+			entry.group,
+		])?.id;
+		const subjectId = queryOne('SELECT id FROM subjects WHERE name = ?', [
+			entry.subject,
+		])?.id;
+		const teacherId = queryOne('SELECT id FROM teachers WHERE full_name = ?', [
+			entry.teacher,
+		])?.id;
+		const classroomId = queryOne(
+			'SELECT id FROM classrooms WHERE room_number = ?',
+			[entry.classroom]
+		)?.id;
 
-			db.run(
+		console.log({ groupId, subjectId, teacherId, classroomId });
+
+		if (groupId && subjectId && teacherId && classroomId) {
+			run(
 				'INSERT OR IGNORE INTO schedule (group_id, subject_id, teacher_id, classroom_id, day_of_week, lesson_number) VALUES (?, ?, ?, ?, ?, ?)',
 				[groupId, subjectId, teacherId, classroomId, entry.day, entry.lesson]
 			);
-		} catch (e) {
-			// Игнорируем ошибки, если какое-то из значений не найдено, чтобы не ломать инициализацию
 		}
 	});
 
@@ -240,14 +230,13 @@ async function main() {
 		insertSampleData();
 
 		// Сохранение базы данных в файл
-		const data = db.export();
-		const buffer = Buffer.from(data);
-		fs.writeFileSync(dbPath, buffer);
+		saveDatabase();
 
 		console.log('База данных успешно инициализирована и сохранена!');
 	} catch (error) {
 		console.error('Ошибка при инициализации базы данных:', error);
 	} finally {
+		const db = getDb();
 		if (db) {
 			db.close();
 			console.log('Соединение с базой данных закрыто.');

@@ -2,7 +2,9 @@ const initSqlJs = require('sql.js');
 const fs = require('fs');
 const path = require('path');
 
-const dbPath = path.join(__dirname, '../../database.db');
+// Render предоставляет доступную для записи директорию в /var/data
+// Если переменная окружения RENDER установлена, используем этот путь
+const dbPath = process.env.RENDER ? '/var/data/database.db' : path.join(__dirname, '../../database.db');
 let db = null;
 
 // Инициализация базы данных

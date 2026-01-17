@@ -4,7 +4,8 @@ const path = require('path');
 
 // Render предоставляет доступную для записи директорию в /var/data
 // Если переменная окружения RENDER установлена, используем этот путь
-const dbPath = process.env.RENDER ? '/var/data/database.db' : path.join(__dirname, '../../database.db');
+// На Render используем временную директорию /tmp, которая всегда доступна для записи
+const dbPath = process.env.RENDER ? '/tmp/database.db' : path.join(__dirname, '../../database.db');
 let db = null;
 
 // Инициализация базы данных

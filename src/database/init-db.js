@@ -3,7 +3,8 @@ const fs = require('fs');
 const path = require('path');
 
 // Путь к файлу базы данных
-const dbPath = path.join(__dirname, '../../database.db');
+// На Render используем временную директорию /tmp, которая всегда доступна для записи
+const dbPath = process.env.RENDER ? '/tmp/database.db' : path.join(__dirname, '../../database.db');
 
 let db;
 

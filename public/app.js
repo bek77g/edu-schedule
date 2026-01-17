@@ -9,7 +9,8 @@ const state = {
 };
 
 // API URL
-const API_URL = 'http://localhost:3000/api';
+// Используем относительный путь, чтобы он работал и локально, и на хостинге
+const API_URL = '/api';
 
 // Утилиты
 const $ = (selector) => document.querySelector(selector);

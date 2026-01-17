@@ -209,8 +209,6 @@ const insertSampleData = () => {
 			[entry.classroom]
 		)?.id;
 
-		console.log({ groupId, subjectId, teacherId, classroomId });
-
 		if (groupId && subjectId && teacherId && classroomId) {
 			run(
 				'INSERT OR IGNORE INTO schedule (group_id, subject_id, teacher_id, classroom_id, day_of_week, lesson_number) VALUES (?, ?, ?, ?, ?, ?)',

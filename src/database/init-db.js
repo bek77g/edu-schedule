@@ -8,64 +8,64 @@ const dbPath = path.join(__dirname, '../../database.db');
 let db;
 
 async function initDatabase() {
-    const SQL = await initSqlJs();
-    
-    // Попытка загрузить существующую базу данных
-    if (fs.existsSync(dbPath)) {
-        const buffer = fs.readFileSync(dbPath);
-        db = new SQL.Database(buffer);
-    } else {
-        db = new SQL.Database();
-    }
-    
-    console.log('Подключение к базе данных SQLite установлено.');
-    
-    // Включение внешних ключей
-    db.run('PRAGMA foreign_keys = ON');
-    
-    return db;
+	const SQL = await initSqlJs();
+
+	// Попытка загрузить существующую базу данных
+	if (fs.existsSync(dbPath)) {
+		const buffer = fs.readFileSync(dbPath);
+		db = new SQL.Database(buffer);
+	} else {
+		db = new SQL.Database();
+	}
+
+	console.log('Подключение к базе данных SQLite установлено.');
+
+	// Включение внешних ключей
+	db.run('PRAGMA foreign_keys = ON');
+
+	return db;
 }
 
 // SQL-запросы для создания таблиц
 const createTables = () => {
-    // Создание таблицы групп
-    db.exec(`
+	// Создание таблицы групп
+	db.exec(`
         CREATE TABLE IF NOT EXISTS groups (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE
         )
     `);
-    console.log('Таблица groups создана.');
+	console.log('Таблица groups создана.');
 
-    // Создание таблицы преподавателей
-    db.exec(`
+	// Создание таблицы преподавателей
+	db.exec(`
         CREATE TABLE IF NOT EXISTS teachers (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             full_name TEXT NOT NULL
         )
     `);
-    console.log('Таблица teachers создана.');
+	console.log('Таблица teachers создана.');
 
-    // Создание таблицы дисциплин
-    db.exec(`
+	// Создание таблицы дисциплин
+	db.exec(`
         CREATE TABLE IF NOT EXISTS subjects (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL UNIQUE
         )
     `);
-    console.log('Таблица subjects создана.');
+	console.log('Таблица subjects создана.');
 
-    // Создание таблицы аудиторий
-    db.exec(`
+	// Создание таблицы аудиторий
+	db.exec(`
         CREATE TABLE IF NOT EXISTS classrooms (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             room_number TEXT NOT NULL UNIQUE
         )
     `);
-    console.log('Таблица classrooms создана.');
+	console.log('Таблица classrooms создана.');
 
-    // Создание таблицы расписания
-    db.exec(`
+	// Создание таблицы расписания
+	db.exec(`
         CREATE TABLE IF NOT EXISTS schedule (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             group_id INTEGER NOT NULL,
@@ -85,67 +85,174 @@ const createTables = () => {
             UNIQUE(classroom_id, day_of_week, lesson_number)
         )
     `);
-    console.log('Таблица schedule создана.');
+	console.log('Таблица schedule создана.');
 };
 
 // Функция для добавления примера данных
 const insertSampleData = () => {
-    // Примеры групп
-    const groups = ['ИВТ-21', 'ИВТ-22', 'ПИ-21', 'ИСТ-21'];
-    const teachers = [
-        'Иванов Иван Иванович',
-        'Петров Петр Петрович',
-        'Сидорова Мария Александровна',
-        'Козлов Алексей Викторович'
-    ];
-    const subjects = [
-        'Математический анализ',
-        'Программирование',
-        'Базы данных',
-        'Операционные системы',
-        'Компьютерные сети',
-        'Веб-разработка'
-    ];
-    const classrooms = ['101', '102', '201', '202', '301', '302'];
+	// Примеры групп (ИИТ, КГТУ)
+	const groups = [
+		'ПИН(дот)-2-23', // Группа пользователя
+		'ИВТ(б)-1-22',
+		'УИТС(м)-1-23',
+		'ПИ(б)-1-21',
+		'Э(б)-2-22',
+		'ТС(б)-1-23',
+	];
 
-    // Вставка данных
-    groups.forEach(group => {
-        db.run('INSERT OR IGNORE INTO groups (name) VALUES (?)', [group]);
-    });
-    teachers.forEach(teacher => {
-        db.run('INSERT OR IGNORE INTO teachers (full_name) VALUES (?)', [teacher]);
-    });
-    subjects.forEach(subject => {
-        db.run('INSERT OR IGNORE INTO subjects (name) VALUES (?)', [subject]);
-    });
-    classrooms.forEach(classroom => {
-        db.run('INSERT OR IGNORE INTO classrooms (room_number) VALUES (?)', [classroom]);
-    });
+	// Примеры преподавателей (КГТУ)
+	const teachers = [
+		'Асанов Урмат Асанович',
+		'Бакиев Руслан Маратович',
+		'Садырова Айгерим Талантовна',
+		'Исмаилов Нурлан Болотович',
+		'Джумалиева Гульнара Алмазовна',
+		'Токтосунов Эмиль Рустамович',
+		'Мамырова Жылдыз Кенешбековна',
+		'Абдыкадыров Алмаз Болотович',
+	];
 
-    console.log('Примеры данных добавлены.');
+	// Примеры дисциплин
+	const subjects = [
+		'Математический анализ',
+		'Программирование на Python',
+		'Базы данных',
+		'Операционные системы',
+		'Компьютерные сети',
+		'Веб-разработка (Frontend)',
+		'Объектно-ориентированное программирование',
+		'Дискретная математика',
+		'История Кыргызстана',
+		'Физическая культура',
+	];
+
+	// Примеры аудиторий
+	const classrooms = ['1/301', '1/215', '4/101', '5/205', 'Спортзал', '2/404'];
+
+	// Вставка данных
+	groups.forEach(group => {
+		db.run('INSERT OR IGNORE INTO groups (name) VALUES (?)', [group]);
+	});
+	teachers.forEach(teacher => {
+		db.run('INSERT OR IGNORE INTO teachers (full_name) VALUES (?)', [teacher]);
+	});
+	subjects.forEach(subject => {
+		db.run('INSERT OR IGNORE INTO subjects (name) VALUES (?)', [subject]);
+	});
+	classrooms.forEach(classroom => {
+		db.run('INSERT OR IGNORE INTO classrooms (room_number) VALUES (?)', [
+			classroom,
+		]);
+	});
+
+	console.log('Примеры данных для справочников добавлены.');
+
+	// Добавление примера расписания для группы ПИН(дот)-2-23
+	const scheduleEntries = [
+		// Понедельник
+		{
+			group: 'ПИН(дот)-2-23',
+			subject: 'Базы данных',
+			teacher: 'Асанов Урмат Асанович',
+			classroom: '1/301',
+			day: 'Понедельник',
+			lesson: 2,
+		},
+		{
+			group: 'ПИН(дот)-2-23',
+			subject: 'Программирование на Python',
+			teacher: 'Бакиев Руслан Маратович',
+			classroom: '4/101',
+			day: 'Понедельник',
+			lesson: 3,
+		},
+		// Вторник
+		{
+			group: 'ПИН(дот)-2-23',
+			subject: 'Веб-разработка (Frontend)',
+			teacher: 'Садырова Айгерим Талантовна',
+			classroom: '5/205',
+			day: 'Вторник',
+			lesson: 1,
+		},
+		{
+			group: 'ПИН(дот)-2-23',
+			subject: 'Физическая культура',
+			teacher: 'Абдыкадыров Алмаз Болотович',
+			classroom: 'Спортзал',
+			day: 'Вторник',
+			lesson: 4,
+		},
+		// Среда
+		{
+			group: 'ПИН(дот)-2-23',
+			subject: 'Базы данных',
+			teacher: 'Асанов Урмат Асанович',
+			classroom: '1/301',
+			day: 'Среда',
+			lesson: 1,
+			type: 'Лаб',
+		}, // Пример с типом
+		{
+			group: 'ПИН(дот)-2-23',
+			subject: 'История Кыргызстана',
+			teacher: 'Джумалиева Гульнара Алмазовна',
+			classroom: '2/404',
+			day: 'Среда',
+			lesson: 3,
+		},
+	];
+
+	const get_id_query = (table, column, value) =>
+		`SELECT id FROM ${table} WHERE ${column} = ?`;
+
+	scheduleEntries.forEach(entry => {
+		try {
+			const groupId = db.exec(get_id_query('groups', 'name', entry.group))[0]
+				.values[0][0];
+			const subjectId = db.exec(
+				get_id_query('subjects', 'name', entry.subject)
+			)[0].values[0][0];
+			const teacherId = db.exec(
+				get_id_query('teachers', 'full_name', entry.teacher)
+			)[0].values[0][0];
+			const classroomId = db.exec(
+				get_id_query('classrooms', 'room_number', entry.classroom)
+			)[0].values[0][0];
+
+			db.run(
+				'INSERT OR IGNORE INTO schedule (group_id, subject_id, teacher_id, classroom_id, day_of_week, lesson_number) VALUES (?, ?, ?, ?, ?, ?)',
+				[groupId, subjectId, teacherId, classroomId, entry.day, entry.lesson]
+			);
+		} catch (e) {
+			// Игнорируем ошибки, если какое-то из значений не найдено, чтобы не ломать инициализацию
+		}
+	});
+
+	console.log('Примеры записей для расписания добавлены.');
 };
 
 // Запуск создания таблиц
 async function main() {
-    try {
-        await initDatabase();
-        createTables();
-        insertSampleData();
-        
-        // Сохранение базы данных в файл
-        const data = db.export();
-        const buffer = Buffer.from(data);
-        fs.writeFileSync(dbPath, buffer);
-        
-        console.log('База данных успешно инициализирована и сохранена!');
-    } catch (error) {
-        console.error('Ошибка при инициализации базы данных:', error);
-    } finally {
-        if (db) {
-            db.close();
-            console.log('Соединение с базой данных закрыто.');
-        }
-    }
+	try {
+		await initDatabase();
+		createTables();
+		insertSampleData();
+
+		// Сохранение базы данных в файл
+		const data = db.export();
+		const buffer = Buffer.from(data);
+		fs.writeFileSync(dbPath, buffer);
+
+		console.log('База данных успешно инициализирована и сохранена!');
+	} catch (error) {
+		console.error('Ошибка при инициализации базы данных:', error);
+	} finally {
+		if (db) {
+			db.close();
+			console.log('Соединение с базой данных закрыто.');
+		}
+	}
 }
 
 main();

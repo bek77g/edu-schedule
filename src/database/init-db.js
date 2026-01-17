@@ -222,25 +222,4 @@ const insertSampleData = () => {
 };
 
 // Запуск создания таблиц
-async function main() {
-	try {
-		await initDatabase();
-		createTables();
-		insertSampleData();
-
-		// Сохранение базы данных в файл
-		saveDatabase();
-
-		console.log('База данных успешно инициализирована и сохранена!');
-	} catch (error) {
-		console.error('Ошибка при инициализации базы данных:', error);
-	} finally {
-		const db = getDb();
-		if (db) {
-			db.close();
-			console.log('Соединение с базой данных закрыто.');
-		}
-	}
-}
-
-main();
+module.exports = { createTables, insertSampleData };
